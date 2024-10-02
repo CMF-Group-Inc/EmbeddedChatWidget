@@ -1,18 +1,18 @@
 <html>
 
-  <head>
-    <title>CHAT PAGE</title>
-  </head>
-
   <body>
     <style type='text/css'>
-     .embeddedServiceHelpButton .helpButton .uiButton {
+      html, body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      .embeddedServiceHelpButton .helpButton .uiButton {
         min-width: unset !important;
         max-width: unset !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: unset !important;
         text-decoration: none !important;
         text-align: center !important;
         padding: 15px 40px !important;
@@ -22,7 +22,7 @@
         margin: 0 !important;
         height: 46px !important;
         line-height: 1 !important;
-        font-size: 1em !important; 
+        font-size: 1em !important;
         color: #fff !important;
         font-weight: normal !important;
         text-shadow: none !important;
@@ -30,46 +30,49 @@
         background: red !important;
         border: none !important;
         text-transform: UPPERCASE !important;
-     }
+      }
 
-     .embeddedServiceHelpButton .helpButton {
+      .embeddedServiceHelpButton .helpButton {
         position: fixed !important;
         bottom: 0px !important;
         right: 12px !important;
         height: 46px !important;
         -webkit-font-smoothing: subpixel-antialiased !important;
-     }
+      }
 
-     .embeddedServiceSidebarMinimizedDefaultUI {
+      .embeddedServiceSidebarMinimizedDefaultUI {
         background-color: red !important;
         border: none !important;
         bottom: 0px !important;
-         position: fixed !important;
+        position: fixed !important;
         height: 46px !important;
-       width: 250px !important
-        
-     }
+        width: 250px !important;
+      }
 
-     .embeddedServiceSidebarMinimizedDefaultUI:hover {
+      .embeddedServiceSidebarMinimizedDefaultUI:hover {
         background-color: red !important;
         border: none !important;
-     }
+      }
 
-     .embeddedServiceHelpButton .helpButton .helpButtonEnabled:hover::before,
-     .embeddedServiceHelpButton .helpButton .helpButtonEnabled:focus::before {
-        border-radius: unset !important;
-     }
-    .embeddedServiceSidebar.sidebarMaximized {
+      .embeddedServiceHelpButton .helpButton .helpButtonEnabled:hover::before,
+      .embeddedServiceHelpButton .helpButton .helpButtonEnabled:focus::before {
+        border-radius: 8px !important;
+      }
+
+      .embeddedServiceSidebar.sidebarMaximized {
         background: rgb(51 51 51 / 0%) !important;
-      position: fixed !important;
-      bottom: 0px !important;
-      min-width: unset !important;
-       
-    }
+        position: fixed !important;
+        bottom: 0px !important;
+        min-width: unset !important;
+      }
 
+      .dockableContainer.showDockableContainer {
+        height: 100% !important;
+      }
     </style>
 
-    <script type='text/javascript' src='https://service.force.com/embeddedservice/5.0/esw.min.js'></script>
+    <script type='text/javascript' src='https://service.force.com/embeddedservice/5.0/esw.js'></script>
+
     <script type='text/javascript'>
       function helpButtonLoaded() {
         var helpButton = document.querySelector('.helpButton');
@@ -77,20 +80,23 @@
           window.setTimeout(helpButtonLoaded, 500);
           return;
         }
-        var height = helpButton.clientHeight;
-        var width = helpButton.clientWidth;
         window.parent.postMessage({
-                                  frameHeight: height,
-                                  frameWidth: width
-                                  }, '*'); 
+          isChatFrame: true,
+          isOpen: false
+        }, '*');
       }
-      window.onload = helpButtonLoaded();
 
-      var initESW = function(gslbBaseURL) {
-		    embedded_svc.settings.displayHelpButton = true; //Or false
-		    embedded_svc.settings.language = ''; 
+      window.onload = helpButtonLoaded;
+
+      var initESW = function (gslbBaseURL) {
+        embedded_svc.settings.displayHelpButton = true;
+        embedded_svc.settings.language = '';
+        if (window.location.href.includes('cmfgroup.com')) {
+          embedded_svc.settings.storageDomain = 'cmfgroup.com';
+        }
         embedded_svc.settings.enabledFeatures = ['LiveAgent'];
         embedded_svc.settings.entryFeature = 'LiveAgent';
+
         embedded_svc.init(
           'https://cmfgroup.my.salesforce.com',
           'https://access.cmfgroup.com/',
@@ -107,32 +113,24 @@
           }
         );
 
-        embedded_svc.addEventHandler("afterMinimize", function() {
-          var sidebar = document.querySelector('.embeddedServiceSidebarMinimizedDefaultUI');
-          var height = sidebar.clientHeight;
-          var width = sidebar.clientWidth;
+        embedded_svc.addEventHandler("afterMinimize", function () {
           window.parent.postMessage({
-            frameHeight: height,
-            frameWidth: width
-           }, '*');
-        });
-
-        embedded_svc.addEventHandler("afterMaximize", function() {
-          var container = document.querySelector('.dockableContainer');
-          var height = container.clientHeight;
-          var width = container.clientWidth;
-          window.parent.postMessage({
-            frameHeight: embedded_svc.settings.widgetHeight,
-            frameWidth: embedded_svc.settings.widgetWidth
+            isChatFrame: true,
+            isOpen: false
           }, '*');
         });
 
-        embedded_svc.addEventHandler("afterDestroy", function() {
-          var height = document.querySelector('.helpButton').clientHeight;
-          var width = document.querySelector('.helpButton').clientWidth;
+        embedded_svc.addEventHandler("afterMaximize", function () {
           window.parent.postMessage({
-            frameHeight: height,
-            frameWidth: width
+            isChatFrame: true,
+            isOpen: true
+          }, '*');
+        });
+
+        embedded_svc.addEventHandler("afterDestroy", function () {
+          window.parent.postMessage({
+            isChatFrame: true,
+            isOpen: false
           }, '*');
         });
       };
@@ -140,14 +138,14 @@
       if (!window.embedded_svc) {
         var s = document.createElement('script');
         s.setAttribute('src', 'https://cmfgroup.my.salesforce.com/embeddedservice/5.0/esw.min.js');
-        s.onload = function() {
+        s.onload = function () {
           initESW(null);
         };
         document.body.appendChild(s);
       } else {
         initESW('https://service.force.com');
       }
-
     </script>
   </body>
+
 </html>
