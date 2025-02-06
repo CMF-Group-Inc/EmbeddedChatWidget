@@ -85,6 +85,18 @@
           isOpen: false
         }, '*');
       }
+      embedded_svc.addEventHandler("onAgentMessage", function () {
+		        setTimeout(() => {
+		            const links = document.querySelectorAll('.uiOutputRichText a');
+               if (links.length > 0) {
+  		            links.forEach(link => {
+  		                if (link.getAttribute('rel') === 'noopener') {
+  		                    link.removeAttribute('rel');
+  		                }
+  		            });
+                }
+		        }, 100);
+		    });
 
       window.onload = helpButtonLoaded;
 
