@@ -1,0 +1,186 @@
+<html>
+
+  <body>
+    <style type='text/css'>
+      html, body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+    .embeddedServiceHelpButton .helpButton .uiButton {
+        background-color: #FF0F17;
+        /*font-family: "Arial", sans-serif;*/
+        /*overflow: unset !important;*/
+        box-shadow: none !important;    
+    }
+
+    .embeddedServiceHelpButton .uiButton {
+        min-width: unset;
+        max-width: unset;
+        width: 3.125rem !important;
+        height: 3.125rem !important;
+        border-radius: 50% !important;
+        padding: 0 1rem !important;
+    }
+    
+    .embeddedServiceHelpButton .helpButton {
+        bottom: 0.75rem !important;
+        right: 1rem !important;
+    }
+
+    .embeddedServiceHelpButton .helpButton .helpButtonEnabled:hover::before,
+    .embeddedServiceHelpButton .helpButton .helpButtonEnabled:focus::before {
+        border-radius: unset;
+        background-color: unset;
+        opacity: unset;
+    }
+
+    .embeddedServiceHelpButton .embeddedServiceIcon {
+        display: inline-block !important;
+    }
+
+    .salesforceIdentityLoginBody2 .ui-widget {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .embeddedServiceSidebarMinimizedDefaultUI.minimizedContainer:hover,
+    .embeddedServiceSidebarMinimizedDefaultUI.minimizedContainer:focus {
+        background-color: #FF0F17 !important;
+    }
+
+    .embeddedServiceSidebarMinimizedDefaultUI .content {
+        position: absolute;
+        top: -3.75rem;
+        right: 1.375rem;
+        background-color: white !important;
+        border-radius: 0.1875rem;
+        box-shadow: 0 0 0.3125rem 0.3125rem rgba(0, 0, 0, 0.1);
+    }
+
+    .embeddedServiceSidebarMinimizedDefaultUI .message {
+        color: #2a3541;
+        font-family: 'Museo Sans';
+        font-weight: 600;
+        width: max-content !important;
+    }
+
+    .embeddedServiceSidebarMinimizedDefaultUI,
+    .forceCommunityEmbeddedServiceHelpButton .flatButton {
+        font-family: "Arial", sans-serif;
+        width: 3.125rem !important;
+        height: 3.125rem !important;
+        border-radius: 50% !important;
+        padding: 0 1rem !important;
+    }
+
+    .embeddedServiceSidebarMinimizedDefaultUI {
+        min-height: unset !important;
+        min-width: unset !important;
+        border: 0;
+        bottom: 0.75rem !important;
+        overflow: unset !important;
+        box-shadow: none !important;
+        background-color: #FF0F17 !important;
+    }
+
+    .forceCommunityEmbeddedServiceHelpButton .flatButton {
+        background-color: #FF0F17 !important;
+    }
+
+      .dockableContainer.showDockableContainer {
+        height: 100% !important;
+      }
+    </style>
+
+    <script type='text/javascript' src='https://service.force.com/embeddedservice/5.0/esw.js'></script>
+
+    <script type='text/javascript'>
+      function helpButtonLoaded() {
+        var helpButton = document.querySelector('.helpButton');
+        if (!helpButton) {
+          window.setTimeout(helpButtonLoaded, 500);
+          return;
+        }
+        window.parent.postMessage({
+          isChatFrame: true,
+          isOpen: false
+        }, '*');
+      }
+     
+
+      window.onload = helpButtonLoaded;
+
+      var initESW = function (gslbBaseURL) {
+        embedded_svc.settings.displayHelpButton = true;
+        embedded_svc.settings.language = '';
+        if (window.location.href.includes('cmfgroup.com')) {
+          embedded_svc.settings.storageDomain = 'cmfgroup.com';
+        }
+        embedded_svc.settings.enabledFeatures = ['LiveAgent'];
+        embedded_svc.settings.entryFeature = 'LiveAgent';
+	embedded_svc.addEventHandler("onAgentMessage", function () {
+		setTimeout(() => {
+			const links = document.querySelectorAll('.uiOutputRichText a');
+               		if (links.length > 0) {
+  		        	links.forEach(link => {
+  		        		if (link.getAttribute('rel') === 'noopener') {
+  		                		link.removeAttribute('rel');
+  		        		}
+  		        	});
+                	}
+		}, 100);
+	});
+
+        embedded_svc.init(
+            'https://cmfgroup--uat.sandbox.my.salesforce.com',
+            'https://cmfgroup--uat.sandbox.my.site.com/',
+            gslbBaseURL,
+            '00DVZ000000IpTt',
+            'Chat_Team',
+            {
+                baseLiveAgentContentURL: 'https://c.la12s-core1.sfdc-8tgtt5.salesforceliveagent.com/content',
+                deploymentId: '572VZ000000Gxyc',
+                buttonId: '573VZ0000006khh',
+                baseLiveAgentURL: 'https://d.la12s-core1.sfdc-8tgtt5.salesforceliveagent.com/chat',
+                eswLiveAgentDevName: 'Chat_Team',
+                isOfflineSupportEnabled: false
+            }
+        );
+	      
+        embedded_svc.addEventHandler("afterMinimize", function () {
+          window.parent.postMessage({
+            isChatFrame: true,
+            isOpen: false
+          }, '*');
+        });
+
+        embedded_svc.addEventHandler("afterMaximize", function () {
+          window.parent.postMessage({
+            isChatFrame: true,
+            isOpen: true
+          }, '*');
+        });
+
+        embedded_svc.addEventHandler("afterDestroy", function () {
+          window.parent.postMessage({
+            isChatFrame: true,
+            isOpen: false
+          }, '*');
+        });
+      };
+
+    if (!window.embedded_svc) {
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://cmfgroup--uat.sandbox.my.salesforce.com/embeddedservice/5.0/esw.min.js');
+        s.onload = function() {
+            initESW(null);
+        };
+        document.body.appendChild(s);
+    } else {
+        initESW('https://service.force.com');
+    }
+    </script>
+  </body>
+
+</html>
